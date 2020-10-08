@@ -147,6 +147,7 @@ public class ValidateReverseProxyAuthentication extends AbstractValidationAction
                 subject.getPrincipals().add(new ReverseProxyPrincipal(headerClaim.getKey(), value));
             });
         }
+        log.debug("{} Subject populated as {}", getLogPrefix(), reverseProxyUsername);
         return subject;
     }
 
