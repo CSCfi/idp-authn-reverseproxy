@@ -6,7 +6,6 @@ mvn clean package
 ```
 ## Prerequisite for installation
 - Shibboleth IdP 4.0.0+
-- [shibboleth-idp-oidc-extension](https://github.com/CSCfi/shibboleth-idp-oidc-extension/wiki) v2.0.0+
 
 ## Installation
 First you need extract the archive. Please not that you most likely *need* to change the owner and group information of the extracted files to suite your installation.
