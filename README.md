@@ -4,11 +4,15 @@ This module is a Shibboleth Idp Authenticaton flow that outsources the authentic
 ```sh
 mvn clean package
 ```
+## Prerequisite for installation
+- Shibboleth IdP 4.0.0+
+- [shibboleth-idp-oidc-extension](https://github.com/CSCfi/shibboleth-idp-oidc-extension/wiki) v2.0.0+
+
 ## Installation
+First you need extract the archive. Please not that you most likely *need* to change the owner and group information of the extracted files to suite your installation.
 ```sh
-cp idp-authn-api-reverseproxy/target/idp-authn-api-reverseproxy-[VERSION].jar /opt/shibboleth-idp/edit-webapp/WEB-INF/lib/.
-cp idp-authn-api-reverseproxy/target/idp-authn-api-reverseproxy-[VERSION].jar /opt/shibboleth-idp/conf.
-cp src/main/resources/conf/authn/reverseproxy.properties /opt/shibboleth-idp/conf/.
+cd /opt/shibboleth-idp
+tar -xf path/to/idp-authn-reverseproxy-distribution-1.0.0-bin.tar.gz --strip-components=1
 ```
 add reverseproxy.properties as one of the included property files  in the /opt/shibboleth-idp/conf/idp.propeties
 ```sh
