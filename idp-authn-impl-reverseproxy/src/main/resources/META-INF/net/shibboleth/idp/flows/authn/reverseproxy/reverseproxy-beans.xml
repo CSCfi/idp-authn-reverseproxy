@@ -35,20 +35,20 @@ THE SOFTWARE.
         p:placeholderSuffix="}" />
 
     <bean id="ExtractHeaderValuesFromRequest" class="fi.csc.shibboleth.authn.reverseproxy.impl.ExtractHeaderValuesFromRequest" scope="prototype"
-        p:httpServletRequest-ref="shibboleth.HttpServletRequest" p:headerEncoding="%{reverserproxy.headervalue.encoding:null}" p:headerPattern="%{reverserproxy.headername.pattern:^OIDC_.*}">
+        p:httpServletRequest-ref="shibboleth.HttpServletRequest" p:headerEncoding="%{reverseproxy.headervalue.encoding:null}" p:headerPattern="%{reverseproxy.headername.pattern:^OIDC_.*}">
     </bean>
 
     <bean id="fi.csc.shibboleth.authn.reverseproxy.login_url" class="java.lang.String"
-        c:_0="%{reverserproxy.login_url:}" />
+        c:_0="%{reverseproxy.login_url:}" />
 
     <bean id="fi.csc.shibboleth.authn.reverseproxy.callback_parameter" class="java.lang.String"
-        c:_0="%{reverserproxy.callback_parameter:}" />
+        c:_0="%{reverseproxy.callback_parameter:}" />
 
     <bean id="fi.csc.shibboleth.authn.reverseproxy.authority_parameter" class="java.lang.String"
-        c:_0="%{reverserproxy.authority_parameter:}" />
+        c:_0="%{reverseproxy.authority_parameter:}" />
         
     <bean id="fi.csc.shibboleth.authn.reverseproxy.authority_default" class="java.lang.String"
-        c:_0="%{reverserproxy.authority_default:}" />
+        c:_0="%{reverseproxy.authority_default:}" />
 
     <bean id="ValidateReverseProxyAuthentication" class="fi.csc.shibboleth.authn.reverseproxy.impl.ValidateReverseProxyAuthentication" scope="prototype"
         p:usernamePattern="%{reverseproxy.headername.username_pattern:OIDC__REMOTE_USER}">
