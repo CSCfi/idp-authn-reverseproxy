@@ -4,9 +4,8 @@
   <parent>
     <groupId>fi.csc</groupId>
     <artifactId>idp-authn-reverseproxy</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
   </parent>
-  <groupId>fi.csc</groupId>
   <artifactId>idp-authn-api-reverseproxy</artifactId>
   <name>idp-authn-api-reverseproxy</name>
   <dependencies>
