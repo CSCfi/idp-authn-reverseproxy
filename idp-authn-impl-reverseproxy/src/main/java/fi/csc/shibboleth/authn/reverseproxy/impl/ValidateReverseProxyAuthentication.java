@@ -144,7 +144,9 @@ public class ValidateReverseProxyAuthentication extends AbstractValidationAction
         subject.getPrincipals().add(new UsernamePrincipal(reverseProxyUsername));
         for (Entry<String, List<String>> headerClaim : reverseProxyContext.getHeaderClaims().entrySet()) {
             headerClaim.getValue().forEach(value -> {
-                subject.getPrincipals().add(new ReverseProxyPrincipal(headerClaim.getKey(), value));
+                if (value != null && !value.isEmpty()) {
+                    subject.getPrincipals().add(new ReverseProxyPrincipal(headerClaim.getKey(), value));
+                }
             });
         }
         log.debug("{} Subject populated as {}", getLogPrefix(), reverseProxyUsername);
