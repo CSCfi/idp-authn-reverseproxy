@@ -51,7 +51,7 @@ THE SOFTWARE.
         c:_0="%{reverseproxy.authority_default:}" />
 
     <bean id="ValidateReverseProxyAuthentication" class="fi.csc.shibboleth.authn.reverseproxy.impl.ValidateReverseProxyAuthentication" scope="prototype"
-        p:usernamePattern="%{reverseproxy.headername.username_pattern:OIDC__REMOTE_USER}">
-    </bean>
+        p:usernamePattern="%{reverseproxy.headername.username_pattern:OIDC__REMOTE_USER}"
+        p:authenticationAcceptablePredicate-ref="%{reverseproxy.authentication_validator:shibboleth.Conditions.TRUE}" />
 
 </beans>

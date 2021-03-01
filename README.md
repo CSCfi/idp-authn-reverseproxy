@@ -26,7 +26,7 @@ cd /opt/shibboleth-idp/bin
 ```
 The module is now ready to be configured.
 ### Configuration
-The authentication flow name is 'authn/reverseproxy'. See [https://wiki.shibboleth.net/confluence/display/IDP4/AuthenticationConfiguration](https://wiki.shibboleth.net/confluence/display/IDP4/AuthenticationConfiguration) how to configure the flow as active flow. Note that flow does not support passing authentication requirements like requested authentication context class or forced authentication to the reverse proxy.
+The authentication flow name is 'authn/reverseproxy'. See [https://wiki.shibboleth.net/confluence/display/IDP4/AuthenticationConfiguration](https://wiki.shibboleth.net/confluence/display/IDP4/AuthenticationConfiguration) how to configure the flow as active flow. Note that flow does not automatically parse incoming authentication requirements like requested authentication context class or forced authentication to be passed to the reverse proxy.
 
 The 'authn/reverseproxy' flow expects that Authenticating Authority is set using the proxy discovery described in [https://wiki.shibboleth.net/confluence/display/IDP4/AuthenticationConfiguration](https://wiki.shibboleth.net/confluence/display/IDP4/AuthenticationConfiguration). If Authenticating Authority is not used a default value must be set to reverseproxy.properties. The properties file must be updated to match the configuration of the reverse proxy installed for all properties.
 
@@ -44,6 +44,57 @@ Protect the location of the IdP passively and set REMOTE_USER to a header matchi
 ```
 Pass the traffic to the protected idp endpoints. This is very much deployment specific.
 ```sh
+
+#Protecting the redirect
+The Authenticating Authority is passed to reverse proxy callback url as request parameter. User is of course able to manipulate these parameters as any request parameters. This is not a concern if the reverse proxy always authenticates the user same way. With any of the more complicated setups this is however not true. By defining a predicate that is used to validate the authentication result the risk for such manipulation may be mitigated.
+
+## Example case for protecting redirect to mod_auth_openidc
+Assume the Authenticating Authority value is set as _https:/upstream.op.com&auth_request_params=acr_values=https://refeds.org/profile/mfa__. The user is expected to be authenticated by issuer _https:/upstream.op.com_ with acr _https:/upstream.op.com_. Both of these request values may be manipulated by the user leading to a authentication that would most likely not satisy the intended request. This can be prevented by defining a validation script. The example script must then be adjusted for any new parameters embedded to Authenticating Authority.
+
+reverseproxy.properties
+```
+reverseproxy.authentication_validator = reverseproxy.Validator
+```
+
+global.xml
+```
+<bean id="reverseproxy.Validator" parent="shibboleth.Conditions.Scripted" factory-method="inlineScript"
+      p:hideExceptions="false">
+      <constructor-arg>
+        <value>
+          <![CDATA[
+          logger = Java.type("org.slf4j.LoggerFactory").getLogger("fi.csc.shibboleth.authn.reverseproxy");
+          logger.debug("External validator for reverseproxy authenticator");
+          valid = true;
+          authnContext = input.getSubcontext("net.shibboleth.idp.authn.context.AuthenticationContext");
+          flowRequestContext = input.getSubcontext("net.shibboleth.idp.profile.context.SpringRequestContext").getRequestContext();
+          reverseProxyContext = authnContext.getSubcontext("fi.csc.shibboleth.authn.context.ReverseProxyAuthenticationContext");
+          receivedIssuer = reverseProxyContext.getHeaderClaims().get("OIDC_CLAIM_iss")[0];
+          receivedACR = reverseProxyContext.getHeaderClaims().get("OIDC_CLAIM_acr")[0];
+          authority = authnContext.getAuthenticatingAuthority();
+          if (typeof authority == "undefined") {
+              authority = flowRequestContext.getActiveFlow().getApplicationContext().getBean('fi.csc.shibboleth.authn.reverseproxy.authority_default');
+          }
+          splitAuthority = authority.split("acr_values=");
+          var acr;
+          if (splitAuthority.length == 2) {
+              acr = splitAuthority[1].split("&")[0];
+          }
+          authority = authority.split("&")[0];
+          if (!(authority === receivedIssuer)) {
+              logger.error("External validator failed matching received authority {} with requested authority {}", receivedIssuer, authority);
+              valid = false;
+          }
+          if (typeof acr != "undefined" && !(acr === receivedACR)) {
+              logger.error("External validator failed matching received acr {} with requested acr {}", receivedACR, acr);
+              valid = false;
+          }
+          valid;
+          ]]>
+        </value>
+      </constructor-arg>
+</bean>
+```
 #Pass all traffic to idp container
 ProxyPass "/"  "http://idp:8080/"
 ProxyPassReverse "/"  "http://idp:8080/"

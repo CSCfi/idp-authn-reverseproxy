@@ -25,6 +25,7 @@ package fi.csc.shibboleth.authn.reverseproxy.impl;
 
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
 import javax.annotation.Nonnull;
@@ -35,6 +36,8 @@ import org.opensaml.profile.context.ProfileRequestContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Predicates;
+
 import fi.csc.shibboleth.authn.context.ReverseProxyAuthenticationContext;
 import fi.csc.shibboleth.authn.reverseproxy.ReverseProxyPrincipal;
 import net.shibboleth.idp.authn.AbstractValidationAction;
@@ -42,6 +45,7 @@ import net.shibboleth.idp.authn.AuthnEventIds;
 import net.shibboleth.idp.authn.context.AuthenticationContext;
 import net.shibboleth.idp.authn.principal.UsernamePrincipal;
 import net.shibboleth.idp.profile.ActionSupport;
+import net.shibboleth.utilities.java.support.logic.Constraint;
 
 /**
  * An action that checks for an {@link ReverseProxyAuthenticationContext} and produces an
@@ -49,7 +53,8 @@ import net.shibboleth.idp.profile.ActionSupport;
  * existing in the context.
  * 
  * First header matching a pattern is set as {@link UsernamePrincipal} for the subject. All headers are populated as
- * {@link ReverseProxyPrincipal} for the subject.
+ * {@link ReverseProxyPrincipal} for the subject. Just before creating otherwise acceptable authentication result the
+ * action calls a predicate to make the final decision whether the result can be accepted.
  * 
  * @event {@link EventIds#PROCEED_EVENT_ID}
  * @event {@link AuthnEventIds#INVALID_AUTHN_CTX}
@@ -78,6 +83,19 @@ public class ValidateReverseProxyAuthentication extends AbstractValidationAction
     /** Username. */
     private String reverseProxyUsername;
 
+    /** Context containing the result to validate. */
+    @Nullable
+    private ReverseProxyAuthenticationContext reverseProxyContext;
+
+    /** Whether the authentication result is acceptable by external evaluation, usually a script. */
+    @Nonnull
+    private Predicate<ProfileRequestContext> authenticationAcceptablePredicate;
+
+    /** Constructor. */
+    public ValidateReverseProxyAuthentication() {
+        authenticationAcceptablePredicate = Predicates.alwaysTrue();
+    }
+
     /**
      * Set the pattern for matching the extracted header to be used as username. Default is 'REMOTE_USER'.
      * 
@@ -87,9 +105,15 @@ public class ValidateReverseProxyAuthentication extends AbstractValidationAction
         usernamePattern = pattern;
     }
 
-    /** Context containing the result to validate. */
-    @Nullable
-    private ReverseProxyAuthenticationContext reverseProxyContext;
+    /**
+     * Set condition to determine whether the authentication result is acceptable.
+     *
+     * @param condition condition to apply
+     */
+    public void setAuthenticationAcceptablePredicate(@Nonnull final Predicate<ProfileRequestContext> condition) {
+        authenticationAcceptablePredicate =
+                Constraint.isNotNull(condition, "Authentication acceptable condition cannot be null");
+    }
 
     /** {@inheritDoc} */
     @Override
@@ -135,7 +159,14 @@ public class ValidateReverseProxyAuthentication extends AbstractValidationAction
                     AuthnEventIds.NO_CREDENTIALS);
             return;
         }
-        buildAuthenticationResult(profileRequestContext, authenticationContext);
+        if (authenticationAcceptablePredicate.test(profileRequestContext)) {
+            buildAuthenticationResult(profileRequestContext, authenticationContext);
+        } else {
+            handleError(profileRequestContext, authenticationContext, AuthnEventIds.INVALID_CREDENTIALS,
+                    AuthnEventIds.INVALID_CREDENTIALS);
+            return;
+        }
+
     }
 
     /** {@inheritDoc} */
