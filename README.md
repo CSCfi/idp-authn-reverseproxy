@@ -11,7 +11,7 @@ mvn clean package
 First you need extract the archive. Please not that you most likely *need* to change the owner and group information of the extracted files to suite your installation.
 ```sh
 cd /opt/shibboleth-idp
-tar -xf path/to/idp-authn-reverseproxy-distribution-1.0.0-bin.tar.gz --strip-components=1
+tar -xf path/to/idp-authn-reverseproxy-distribution-1.1.0-bin.tar.gz --strip-components=1
 ```
 add reverseproxy.properties as one of the included property files  in the /opt/shibboleth-idp/conf/idp.propeties
 ```sh
@@ -26,9 +26,7 @@ cd /opt/shibboleth-idp/bin
 ```
 The module is now ready to be configured.
 ### Configuration
-The authentication flow name is 'authn/reverseproxy'. See [https://wiki.shibboleth.net/confluence/display/IDP4/AuthenticationConfiguration](https://wiki.shibboleth.net/confluence/display/IDP4/AuthenticationConfiguration) how to configure the flow as active flow. Note that flow does not automatically parse incoming authentication requirements like requested authentication context class or forced authentication to be passed to the reverse proxy.
-
-The 'authn/reverseproxy' flow expects that Authenticating Authority is set using the proxy discovery described in [https://wiki.shibboleth.net/confluence/display/IDP4/AuthenticationConfiguration](https://wiki.shibboleth.net/confluence/display/IDP4/AuthenticationConfiguration). If Authenticating Authority is not used a default value must be set to reverseproxy.properties. The properties file must be updated to match the configuration of the reverse proxy installed for all properties.
+The authentication flow name is 'authn/reverseproxy'. See [https://wiki.shibboleth.net/confluence/display/IDP4/AuthenticationConfiguration](https://wiki.shibboleth.net/confluence/display/IDP4/AuthenticationConfiguration) how to configure the flow as active flow. The 'authn/reverseproxy' flow expects that Authenticating Authority is set using the proxy discovery described in [https://wiki.shibboleth.net/confluence/display/IDP4/AuthenticationConfiguration](https://wiki.shibboleth.net/confluence/display/IDP4/AuthenticationConfiguration). If Authenticating Authority is not used a default value must be set to reverseproxy.properties. The properties file must be updated to match the configuration of the reverse proxy installed for all properties.
 
 #### mod_auth_openidc - Minimal setup instructions for mod_auth_openidc
 Configure mod_auth_openidc as a relying party to a OP or OPs as descibed in [https://github.com/zmartzone/mod_auth_openidc](https://github.com/zmartzone/mod_auth_openidc).
@@ -44,20 +42,31 @@ Protect the location of the IdP passively and set REMOTE_USER to a header matchi
 ```
 Pass the traffic to the protected idp endpoints. This is very much deployment specific.
 ```sh
+#Pass all traffic to idp container
+ProxyPass "/"  "http://idp:8080/"
+ProxyPassReverse "/"  "http://idp:8080/"
+```
 
-#Protecting the redirect
-The Authenticating Authority is passed to reverse proxy callback url as request parameter. User is of course able to manipulate these parameters as any request parameters. This is not a concern if the reverse proxy always authenticates the user same way. With any of the more complicated setups this is however not true. By defining a predicate that is used to validate the authentication result the risk for such manipulation may be mitigated.
+#### Protecting the redirect
+The Authenticating Authority is passed to reverse proxy callback url as request parameter. User is able to manipulate these parameters as any request parameters. This is not a concern if the reverse proxy always authenticates the user same way. With any of the more complicated setups this is however not true. By defining a predicate that is used to validate the authentication result the risk for such manipulation may be mitigated.
 
-## Example case for protecting redirect to mod_auth_openidc
-Assume the Authenticating Authority value is set as _https:/upstream.op.com&auth_request_params=acr_values=https://refeds.org/profile/mfa__. The user is expected to be authenticated by issuer _https:/upstream.op.com_ with acr _https:/upstream.op.com_. Both of these request values may be manipulated by the user leading to a authentication that would most likely not satisy the intended request. This can be prevented by defining a validation script. The example script must then be adjusted for any new parameters embedded to Authenticating Authority.
+Assume the Authenticating Authority value is set as:
+
+```sh
+https:/upstream.op.com&auth_request_params=acr_values=https://refeds.org/profile/mfa
+```
+
+The user is expected to be authenticated by issuer _https:/upstream.op.com_ with acr _https://refeds.org/profile/mfa_. Both of these request values may be manipulated by the user and we have to make sure the response satisfies the intended request. This can be prevented by defining a validation script. 
 
 reverseproxy.properties
-```
+
+```sh
 reverseproxy.authentication_validator = reverseproxy.Validator
 ```
 
 global.xml
-```
+
+```sh
 <bean id="reverseproxy.Validator" parent="shibboleth.Conditions.Scripted" factory-method="inlineScript"
       p:hideExceptions="false">
       <constructor-arg>
@@ -95,7 +104,4 @@ global.xml
       </constructor-arg>
 </bean>
 ```
-#Pass all traffic to idp container
-ProxyPass "/"  "http://idp:8080/"
-ProxyPassReverse "/"  "http://idp:8080/"
-```
+Note! The script must then be adjusted for any new parameters embedded to Authenticating Authority.
