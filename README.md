@@ -67,41 +67,45 @@ reverseproxy.authentication_validator = reverseproxy.Validator
 global.xml
 
 ```sh
-<bean id="reverseproxy.Validator" parent="shibboleth.Conditions.Scripted" factory-method="inlineScript"
-      p:hideExceptions="false">
-      <constructor-arg>
-        <value>
-          <![CDATA[
-          logger = Java.type("org.slf4j.LoggerFactory").getLogger("fi.csc.shibboleth.authn.reverseproxy");
-          logger.debug("External validator for reverseproxy authenticator");
-          valid = true;
-          authnContext = input.getSubcontext("net.shibboleth.idp.authn.context.AuthenticationContext");
-          flowRequestContext = input.getSubcontext("net.shibboleth.idp.profile.context.SpringRequestContext").getRequestContext();
-          reverseProxyContext = authnContext.getSubcontext("fi.csc.shibboleth.authn.context.ReverseProxyAuthenticationContext");
-          receivedIssuer = reverseProxyContext.getHeaderClaims().get("OIDC_CLAIM_iss")[0];
-          receivedACR = reverseProxyContext.getHeaderClaims().get("OIDC_CLAIM_acr")[0];
-          authority = authnContext.getAuthenticatingAuthority();
-          if (typeof authority == "undefined") {
-              authority = flowRequestContext.getActiveFlow().getApplicationContext().getBean('fi.csc.shibboleth.authn.reverseproxy.authority_default');
-          }
-          splitAuthority = authority.split("acr_values=");
-          var acr;
-          if (splitAuthority.length == 2) {
-              acr = splitAuthority[1].split("&")[0];
-          }
-          authority = authority.split("&")[0];
-          if (!(authority === receivedIssuer)) {
-              logger.error("External validator failed matching received authority {} with requested authority {}", receivedIssuer, authority);
-              valid = false;
-          }
-          if (typeof acr != "undefined" && !(acr === receivedACR)) {
-              logger.error("External validator failed matching received acr {} with requested acr {}", receivedACR, acr);
-              valid = false;
-          }
-          valid;
-          ]]>
-        </value>
-      </constructor-arg>
-</bean>
+        <bean id="reverseproxy.Validator" parent="shibboleth.Conditions.Scripted" factory-method="inlineScript"
+          p:hideExceptions="false">
+          <constructor-arg>
+            <value>
+              <![CDATA[
+              logger = Java.type("org.slf4j.LoggerFactory").getLogger("fi.csc.shibboleth.authn.reverseproxy");
+              logger.debug("External validator for reverseproxy authenticator");
+              valid = true;
+              authnContext = input.getSubcontext("net.shibboleth.idp.authn.context.AuthenticationContext");
+              flowRequestContext = input.getSubcontext("net.shibboleth.idp.profile.context.SpringRequestContext").getRequestContext();
+              reverseProxyContext = authnContext.getSubcontext("fi.csc.shibboleth.authn.context.ReverseProxyAuthenticationContext");
+              receivedIssuer = reverseProxyContext.getHeaderClaims().get("OIDC_CLAIM_iss")[0];
+              var receivedACR;
+              values = reverseProxyContext.getHeaderClaims().get("OIDC_CLAIM_acr");
+              if (values != null && values.size()>0){
+                  receivedACR = values[0];
+              }
+              authority = authnContext.getAuthenticatingAuthority();
+              if (authority == null) {
+                  authority = flowRequestContext.getActiveFlow().getApplicationContext().getBean('fi.csc.shibboleth.authn.reverseproxy.authority_default');
+              }
+              splitAuthority = authority.split("acr_values=");
+              var acr;
+              if (splitAuthority.length == 2) {
+                  acr = splitAuthority[1].split("&")[0];
+              }
+              authority = authority.split("&")[0];
+              if (!(authority === receivedIssuer)) {
+                  logger.error("External validator failed matching received authority {} with requested authority {}", receivedIssuer, authority);
+                  valid = false;
+              }
+              if (acr != null && !(acr === receivedACR)) {
+                  logger.error("External validator failed matching received acr {} with requested acr {}", receivedACR, acr);
+                  valid = false;
+              }
+              valid;
+              ]]>
+            </value>
+          </constructor-arg>
+        </bean>
 ```
 Note! The script must then be adjusted for any new parameters embedded to Authenticating Authority.
