@@ -1,3 +1,5 @@
+[![CodeQL](https://github.com/CSCfi/idp-authn-reverseproxy/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/CSCfi/idp-authn-reverseproxy/actions/workflows/codeql-analysis.yml)
+
 # idp-authn-reverseproxy
 This module is a Shibboleth Idp Authenticaton flow that outsources the authentication from a reverse proxy. 
 ## Build
