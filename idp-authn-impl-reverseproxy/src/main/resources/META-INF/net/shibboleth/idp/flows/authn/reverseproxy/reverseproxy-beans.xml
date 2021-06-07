@@ -54,4 +54,8 @@ THE SOFTWARE.
         p:usernamePattern="%{reverseproxy.headername.username_pattern:OIDC__REMOTE_USER}"
         p:authenticationAcceptablePredicate-ref="%{reverseproxy.authentication_validator:shibboleth.Conditions.TRUE}" />
 
+    <bean id="PopulateSubjectCanonicalizationContext"
+        class="net.shibboleth.idp.authn.impl.PopulateSubjectCanonicalizationContext" scope="prototype"
+        p:availableFlows-ref="shibboleth.PostLoginSubjectCanonicalizationFlows" />
+
 </beans>
