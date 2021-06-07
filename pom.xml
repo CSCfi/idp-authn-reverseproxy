@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>fi.csc</groupId>
   <artifactId>idp-authn-reverseproxy</artifactId>
-  <version>1.1.0</version>
+  <version>1.1.1</version>
   <name>idp-authn-reverseproxy</name>
   <packaging>pom</packaging>
   <properties>
