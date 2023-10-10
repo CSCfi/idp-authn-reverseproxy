@@ -31,15 +31,16 @@ import java.util.StringTokenizer;
 import javax.annotation.Nonnull;
 
 import net.shibboleth.idp.authn.principal.CloneablePrincipal;
-import net.shibboleth.utilities.java.support.annotation.constraint.NotEmpty;
-import net.shibboleth.utilities.java.support.logic.Constraint;
-import net.shibboleth.utilities.java.support.logic.ConstraintViolationException;
+import net.shibboleth.shared.annotation.constraint.NotEmpty;
+import net.shibboleth.shared.logic.Constraint;
+import net.shibboleth.shared.logic.ConstraintViolationException;
 import net.shibboleth.utilities.java.support.primitive.StringSupport;
 
 import com.google.common.base.MoreObjects;
 
 /**
- * This class extends {@link Principal} by dividing the name to key and value with a static separator string.
+ * This class extends {@link Principal} by dividing the name to key and value
+ * with a static separator string.
  */
 public abstract class KeyValuePrincipal implements CloneablePrincipal {
 
@@ -75,7 +76,7 @@ public abstract class KeyValuePrincipal implements CloneablePrincipal {
     /**
      * Constructor.
      * 
-     * @param theKey the key, can not be null or empty
+     * @param theKey   the key, can not be null or empty
      * @param theValue the value corresponding to the key, can not be null or empty
      */
     public KeyValuePrincipal(@Nonnull @NotEmpty final String theKey, @Nonnull @NotEmpty final String theValue) {

@@ -27,7 +27,8 @@ package fi.csc.shibboleth.authn.reverseproxy;
 
 import javax.annotation.Nonnull;
 
-import net.shibboleth.utilities.java.support.annotation.constraint.NotEmpty;
+import net.shibboleth.shared.annotation.constraint.NotEmpty;
+
 
 /**
  * This class is designed to carry HTTP header key and value -pairs inside {@link Principal}.
