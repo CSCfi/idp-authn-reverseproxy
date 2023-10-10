@@ -35,8 +35,8 @@ import org.opensaml.profile.action.ActionSupport;
 import org.opensaml.profile.context.ProfileRequestContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import javax.servlet.http.HttpServletRequest;
 import fi.csc.shibboleth.authn.context.ReverseProxyAuthenticationContext;
+import jakarta.servlet.http.HttpServletRequest;
 
 /**
  * Action extracts and populates selected http headers to {@link ReverseProxyAuthenticationContext}. This context is

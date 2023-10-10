@@ -4,7 +4,7 @@
   <parent>
     <groupId>fi.csc</groupId>
     <artifactId>idp-authn-reverseproxy</artifactId>
-    <version>1.1.1</version>
+    <version>2.0.0</version>
   </parent>
   <artifactId>idp-authn-impl-reverseproxy</artifactId>
   <name>idp-authn-impl-reverseproxy</name>
@@ -21,22 +21,26 @@
       <scope>provided</scope>
     </dependency>
     <dependency>
-      <groupId>javax.servlet</groupId>
-      <artifactId>javax.servlet-api</artifactId>
+      <groupId>jakarta.servlet</groupId>
+      <artifactId>jakarta.servlet-api</artifactId>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>jakarta.json</groupId>
+      <artifactId>jakarta.json-api</artifactId>
       <scope>provided</scope>
     </dependency>
     <!-- Test -->
     <dependency>
       <groupId>net.shibboleth.idp</groupId>
-      <artifactId>idp-profile-api</artifactId>
+      <artifactId>idp-saml-api</artifactId>
       <scope>test</scope>
       <type>test-jar</type>
     </dependency>
     <dependency>
       <groupId>net.shibboleth.idp</groupId>
-      <artifactId>idp-saml-api</artifactId>
+      <artifactId>idp-testing</artifactId>
       <scope>test</scope>
-      <type>test-jar</type>
     </dependency>
     <dependency>
       <groupId>org.testng</groupId>

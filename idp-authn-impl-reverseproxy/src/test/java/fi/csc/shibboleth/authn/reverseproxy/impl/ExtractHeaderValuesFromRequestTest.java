@@ -23,18 +23,20 @@
 
 package fi.csc.shibboleth.authn.reverseproxy.impl;
 
-import org.springframework.mock.web.MockHttpServletRequest;
 import org.opensaml.profile.context.ProfileRequestContext;
+import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.webflow.execution.Event;
 import org.springframework.webflow.execution.RequestContext;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
-import net.shibboleth.idp.profile.ActionTestingSupport;
-import net.shibboleth.idp.profile.RequestContextBuilder;
 import net.shibboleth.idp.profile.context.navigate.WebflowRequestContextProfileRequestContextLookup;
-import net.shibboleth.utilities.java.support.component.ComponentInitializationException;
+import net.shibboleth.idp.profile.testing.ActionTestingSupport;
+import net.shibboleth.idp.profile.testing.RequestContextBuilder;
+import net.shibboleth.shared.component.ComponentInitializationException;
+import net.shibboleth.shared.primitive.NonnullSupplier;
 import fi.csc.shibboleth.authn.context.ReverseProxyAuthenticationContext;
+import jakarta.servlet.http.HttpServletRequest;
 import net.shibboleth.idp.authn.AuthnEventIds;
 import net.shibboleth.idp.authn.context.AuthenticationContext;
 
@@ -54,7 +56,8 @@ public class ExtractHeaderValuesFromRequestTest {
     @BeforeMethod
     public void initTests() throws ComponentInitializationException {
         action = new ExtractHeaderValuesFromRequest();
-        action.setHttpServletRequest(new MockHttpServletRequest());
+        final MockHttpServletRequest request = new MockHttpServletRequest();
+        action.setHttpServletRequestSupplier(new NonnullSupplier<> () {public HttpServletRequest get() { return request;}});
         ((MockHttpServletRequest) action.getHttpServletRequest()).addHeader("header1", "value1");
         ((MockHttpServletRequest) action.getHttpServletRequest()).addHeader("header2", "value2");
         ((MockHttpServletRequest) action.getHttpServletRequest()).addHeader("header3", "value3");
@@ -91,7 +94,8 @@ public class ExtractHeaderValuesFromRequestTest {
 
     @Test
     public void testSuccessNoHeaders() throws ComponentInitializationException {
-        action.setHttpServletRequest(new MockHttpServletRequest());
+        final MockHttpServletRequest request = new MockHttpServletRequest();
+        action.setHttpServletRequestSupplier(new NonnullSupplier<> () {public HttpServletRequest get() { return request;}});
         action.initialize();
         final Event event = action.execute(src);
         ActionTestingSupport.assertProceedEvent(event);
