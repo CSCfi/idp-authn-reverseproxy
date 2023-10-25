@@ -35,7 +35,7 @@ THE SOFTWARE.
         p:placeholderSuffix="}" />
 
     <bean id="ExtractHeaderValuesFromRequest" class="fi.csc.shibboleth.authn.reverseproxy.impl.ExtractHeaderValuesFromRequest" scope="prototype"
-        p:httpServletRequest-ref="shibboleth.HttpServletRequest" p:headerEncoding="%{reverseproxy.headervalue.encoding:null}" p:headerPattern="%{reverseproxy.headername.pattern:^OIDC_.*}">
+        p:httpServletRequestSupplier-ref="shibboleth.HttpServletRequestSupplier" p:headerEncoding="%{reverseproxy.headervalue.encoding:null}" p:headerPattern="%{reverseproxy.headername.pattern:^OIDC_.*}">
     </bean>
 
     <bean id="fi.csc.shibboleth.authn.reverseproxy.login_url" class="java.lang.String"
